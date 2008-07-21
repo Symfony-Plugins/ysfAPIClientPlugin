@@ -1,0 +1,37 @@
+prod:
+
+dev:
+  api:
+    debug:  true
+
+all:
+  api:
+    enabled: true                      # enable/disable api client
+  
+    servers:
+    
+      yahoo:
+        host:         http://boss.yahooapis.com
+        port:         80
+        prefix:       /ysearch/web/
+        version:      v1
+        timeout:      10
+        format:       json
+        appid:        caQ3LHzV34FWzn43PFzq0L2UlRd3E5Xs5wSWIpCZ6EjfASvsUEeBpZRE8sbmt.zbcv4LZhI-
+        
+      google:
+        host:         http://ajax.googleapis.com
+        port:         80
+        prefix:       /ajax/services/search/web
+        version:      
+        timeout:      10
+
+    cache:                            # a cache for api client data
+      class: sfMemcacheCache
+      param:
+        host:       127.0.0.1
+        port:       11211
+        persistent: true
+        prefix:     ysf.api
+        lifetime:   3600
+        automatic_cleaning_factor: 0

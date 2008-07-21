@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>ysfBuildPlugin</name>
+ <channel>pear.symfony-project.com</channel>
+ <summary>ysfBuildPlugin provides a build system for symfony projects.</summary>
+ <description>ysfBuildPlugin provides a build system for symfony projects.</description>
+ <lead>
+  <name>Dustin Whittle</name>
+  <user>dwhittle</user>
+  <email>dustin.whittle@symfony-project.com</email>
+  <active>yes</active>
+ </lead>
+ <date>2008-04-22</date>
+ <time>17:03:10</time>
+ <version>
+  <release>1.1.0.0</release>
+  <api>1.1.0.0</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.symfony-project.com/license">MIT License</license>
+ <notes>--</notes>
+ <contents>
+  <dir baseinstalldir="/" name="/">
+   <dir name="lib">
+    <dir name="config">
+     <file name="ysfViewConfigHandler.class.php" role="php" />
+    </dir> <!-- //lib/config -->
+    <dir name="exception">
+     <file name="ysfAPIClientException.class.php" role="php" />
+    </dir> <!-- //lib/exception -->
+    <dir name="filter">
+     <file name="ysfExecutionFilter.class.php" role="php" />
+    </dir> <!-- //lib/filter -->
+    <dir name="helper">
+     <file name="PartialHelper.php" role="php" />
+    </dir> <!-- //lib/helper -->
+    <dir name="log">
+     <file name="ysfAPIClientLogger.class.php" role="php" />
+    </dir> <!-- //lib/log -->
+    <file name="ysfAPIBaseProvider.class.php" role="php" />
+    <file name="ysfAPIClient.class.php" role="php" />
+   </dir> <!-- //lib -->
+   <file name="LICENSE" role="data" />
+   <file name="README" role="data" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.2.1</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.1</min>
+   </pearinstaller>
+   <package>
+    <name>symfony</name>
+    <channel>pear.symfony-project.com</channel>
+    <min>1.1.0</min>
+    <max>1.2.0</max>
+    <exclude>1.2.0</exclude>
+   </package>
+  </required>
+ </dependencies>
+ <phprelease />
+ <changelog>
+  <release>
+   <version>
+    <release>1.1.0.0</release>
+    <api>1.1.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2008-04-22</date>
+   <license uri="http://www.symfony-project.com/license">MIT License</license>
+   <notes>--</notes>
+  </release>
+ </changelog>
+</package>

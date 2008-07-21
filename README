@@ -1,0 +1,98 @@
+= ysfAPIClientPlugin - An api client (curl multi adapter) for parallel dispatching for web services requests for the symfony framework =
+
+The ysfAPIClient provides a simple wrapper around curl multi to allow for parallel dispatching (to minimize latency) of web service requests.
+The client works by using providers that generate curl handles that get batched together. 
+
+== Installation ==
+
+You can install symfony two ways:
+
+'''1. Install the plugin via the symfony cli'''
+
+{{{
+symfony plugin:install ysfAPIClientPlugin
+}}}
+
+'''2. Install the plugin via subversion'''
+
+This plugin can be downloaded and installed into the plugins directory of your project.
+
+{{{
+svn export http://svn.symfony-project.org/plugins/ysfAPIClientPlugin/trunk ysfAPIClientPlugin
+}}}
+
+
+== Configuration ==
+
+The ysfAPIClientPlugin can provide functionality to allow aggregation of component data,
+to use this functionality edit the execution filter in 'config/filters.yml':
+{{{
+execution:
+  class: ysfExecutionFilter
+}}}
+
+The ysfAPIClientPlugin is extremely configurable via the 'api.yml' configuration file:
+{{{
+prod:
+  api:
+    debug:  false
+
+dev:
+  api:
+    debug:  true
+
+all:
+  api:
+    enabled: true                      # enable/disable api client
+    debug:   true                      # enable debug logging
+  
+    servers:
+    
+      yahoo:
+        host:         http://boss.yahooapis.com
+        port:         80
+        prefix:       /ysearch/web/
+        version:      v1
+        timeout:      5
+        format:       json
+
+    cache:                            # a cache for api client data
+      class: sfMemcacheCache
+      param:
+        host:       127.0.0.1
+        port:       11211
+        persistent: true
+        prefix:     ysf.api
+        lifetime:   3600
+        automatic_cleaning_factor: 0
+
+}}}
+
+== Usage ==
+The ysfAPIClientPlugin comes with a demo module 'ysfAPI' that shows how to do parallel requests for search with Yahoo!/Google JSON search apis.
+Here is a snippet of the api client from an action:
+{{{
+public function executeSearch($request)
+{
+  $api = ysfAPIClient::getInstance();
+  
+  $this->query = $request->getParameter('query', 'symfony');
+  
+  $ysearch = $api->addRequest('yahoo.search', array('query' => $this->query));
+  $gsearch = $api->addRequest('google.search', array('query' => $this->query));
+  
+  if($api->execute())
+  {
+    $yJson = $api->getData($ysearch);
+    $gJson = $api->getData($gsearch);
+  
+    $this->results = array_merge($yJson->ysearchresponse->resultset_web, $gJson->responseData->results);
+  }
+  else
+  {
+    $this->results = array();
+  }
+}
+}}}
+
+Try it out in the bundled module: http://localhost/ysfAPI/index?query=symfony.

@@ -1,0 +1,8 @@
+config/api.yml:
+  class:    sfDefineEnvironmentConfigHandler
+  param:
+    prefix: ysf_
+
+modules/*/config/view.yml:
+  class:    ysfViewConfigHandler
+ 
