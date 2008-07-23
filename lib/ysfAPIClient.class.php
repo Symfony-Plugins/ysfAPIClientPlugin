@@ -21,12 +21,13 @@
 class ysfAPIClient
 {
 
-  protected static $instance = null;
+  protected static $instance = null, $count = 0;
 
   protected $context = null;
 
   private $cache = null,
           $batches = array(),
+          $timer = null,
           $requests = array(),
           $responses = array(),
           $options = array(),
@@ -79,9 +80,6 @@ class ysfAPIClient
     $this->context = $context;
     $this->options = $options;
 
-    $this->options['debug'] = isset($this->options['debug']) ? (boolean) $this->options['debug'] : false;
-    $this->options['servers'] = isset($this->options['servers']) ? $this->options['servers'] : array();
-
     $this->loadConfiguration();
   }
 
@@ -96,17 +94,13 @@ class ysfAPIClient
       require($config);
     }
 
-    if(sfConfig::has('ysf_api_cache'))
-    {
-      $cacheAdapter = sfConfig::get('ysf_api_cache');
-      $this->cache = new $cacheAdapter['class']($cacheAdapter['param']);
-    }
-    else
-    {
-      $this->cache = new sfNoCache();
-    }
+    $this->options['enabled'] = sfConfig::get('ysf_api_enabled', true);
+    $this->options['debug']   = sfConfig::get('ysf_api_debug', false);
 
-    $this->options['servers'] = sfToolkit::arrayDeepMerge($this->options['servers'], sfConfig::get('ysf_api_servers', array()));
+    $this->options['servers'] = sfToolkit::arrayDeepMerge(isset($this->options['servers']) ? $this->options['servers'] : array(), sfConfig::get('ysf_api_servers', array()));
+
+    $this->options['cache']   = sfConfig::get('ysf_api_cache', array());
+    $this->cache = isset($this->options['cache']['class']) ? new $this->options['cache']['class'](isset($this->options['cache']['param']) ? $this->options['cache']['param'] : array()) : new sfNoCache();
   }
 
   /**
@@ -116,8 +110,6 @@ class ysfAPIClient
    */
   public function setOptions($options)
   {
-    $options['debug'] = isset($options['debug']) ? (boolean) $options['debug'] : $this->options['debug'];
-
     $this->options = $options;
   }
 
@@ -156,6 +148,12 @@ class ysfAPIClient
    */
   public function execute()
   {
+    if($this->options['debug'])
+    {
+    	$this->timer = sfTimerManager::getTimer('API Requests');
+    }
+
+    $id = time(); // first batch id
     if(is_array($this->options['servers']) && !empty($this->options['servers']))
     {
       foreach($this->options['servers'] as $server => $options)
@@ -168,19 +166,16 @@ class ysfAPIClient
           $options['method'] = isset($options['method']) ? $options['method'] : 'rest';
 
           $options[$options['method']]['uri'] = isset($options[$options['method']]['uri']) ? $options[$options['method']]['uri'] : '';
-
           $options[$options['method']]['parameter'] = isset($options[$options['method']]['parameter']) ? $options[$options['method']]['parameter'] : '';
 
           if(isset($options['method']) && $options['method'] == 'compound')
           {
-            $id = md5($server . 'compound');
+            $id = md5($id.$server);
             $request = $this->encodeCompound($this->requests[$server], $this->options['servers'][$server]);
 
             if(!empty($request))
             {
               $encodedRequest = $this->encodeRequest($request, $options['format']);
-
-              $this->batches[$id]['request'] = $encodedRequest;
 
               $curlRequest = $provider->buildCurlRequest($options[$options['method']]['uri'], array($options[$options['method']]['parameter'] => $encodedRequest));
 
@@ -192,11 +187,11 @@ class ysfAPIClient
           }
           else // single requests (usually rest or similar)
           {
-            foreach($this->requests[$server] as $id => $request)
+            foreach($this->requests[$server] as $id => $curlRequest)
             {
-              if(!isset($this->responses[$id]) && ($request != false))
+              if(!isset($this->responses[$id]) && ($curlRequest != false))
               {
-                $this->batches[$id]['handle'] = $request;
+                $this->batches[$id]['handle'] = $curlRequest;
               }
             }
           }
@@ -208,13 +203,13 @@ class ysfAPIClient
     {
       $mh = curl_multi_init();
 
+      if($this->options['debug'])
+      {
+        $this->context->getLogger()->info(sprintf("{ysfAPIClient} Executing batch #%s with %s requests", ++self::$count, count($this->batches)), sfLogger::DEBUG);
+      }
+
       foreach($this->batches as $id => $batch)
       {
-        if($this->options['debug'])
-        {
-          $this->context->getLogger()->info(sprintf("executing batch id '%s'", $id), sfLogger::DEBUG);
-        }
-
         curl_multi_add_handle($mh, $batch['handle']);
       }
 
@@ -250,6 +245,11 @@ class ysfAPIClient
         curl_multi_info_read($mh, $still_running);
       }
       while($still_running);
+
+      if($this->options['debug'])
+      {
+        $this->timer->addTime();
+      }
 
       foreach($this->options['servers'] as $server => $options)
       {
@@ -341,7 +341,7 @@ class ysfAPIClient
       {
         $serverParameters = $this->options['servers'][$server];
 
-        $id = md5($server . $call . serialize($options));
+        $id = md5($server . $call . serialize($parameters));
         if(!isset($this->requests[$server][$id]))
         {
           $$className = new $className($serverParameters);
@@ -352,8 +352,7 @@ class ysfAPIClient
 
             if($this->options['debug'])
             {
-              $this->context->getLogger()->info(sprintf("{ysfAPIClient} adding request '%s' with parameters %s", $call, str_replace(array('array (', '0 => ', ",\n  )", ",\n)"), '', var_export($options, true))));
-              $this->context->getLogger()->info(sprintf("{ysfAPIClient} adding request id '%s' for server '%s'", $id, $server));
+              $this->context->getLogger()->info(sprintf("{ysfAPIClient} adding request '%s' to batch with parameters: %s", $call, str_replace(array('array (', '0 => ', ",\n  )", ",\n)", "\n"), '', var_export($parameters, true))));
             }
           }
           else

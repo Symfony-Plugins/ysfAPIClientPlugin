@@ -24,40 +24,56 @@ class ysfAPIActions extends sfActions
    * Executes index action
    *
    */
-  public function executeIndex($request)
+  public function executeSearch($request)
   {
 
-    $timer = sfTimerManager::getTimer('API Requests');
+    // search form
+    $this->form = new sfForm();
+    $this->form->setWidgets(array('query' => new sfWidgetFormInput(array(), array('class' => 'search-box'))));
+    $this->form->setValidators(array('query' => new sfValidatorString(array('min_length' => 3))));
+    $this->form->getWidgetSchema()->setNameFormat('search[%s]');
+    $this->form->getWidgetSchema()->setFormFormatterName('list');
 
-    $api = ysfAPIClient::getInstance();
+    // search results
+    $this->results = array();
 
-    $this->query = $request->getParameter('query', 'symfony');
-
-    $ysearch = $api->addRequest('yahoo.search', array('query' => $this->query), array(CURLOPT_USERAGENT => 'my Y! search'));
-    $gsearch = $api->addRequest('google.search', array('query' => $this->query), array(CURLOPT_USERAGENT => 'my G search'));
-
-    if($api->execute())
+    if($request->isMethod('post'))
     {
-      $yJson = $api->getData($ysearch);
-      $gJson = $api->getData($gsearch);
+      // bind posted form
+      $this->form->bind($request->getParameter('search'));
 
-      // normalization logic can be moved to provier
-      $this->results = array();
-      foreach (array_merge($yJson->ysearchresponse->resultset_web, $gJson->responseData->results) as $data)
+      if($this->form->isValid())
       {
-        $result = new stdClass();
-        $result->title = $data->title;
-        $result->abstract = isset($data->abstract) ? $data->abstract : $data->content;
-        $result->url = $data->url;
+        $this->query = $this->form->getValue('query');
 
-        array_push($this->results, $result);
+        $api = ysfAPIClient::getInstance();
+
+        // parallel
+        $ysearch = $api->addRequest('yahoo.search', array('query' => $this->query), array(CURLOPT_USERAGENT => 'my Y! search'));
+        $gsearch = $api->addRequest('google.search', array('query' => $this->query), array(CURLOPT_USERAGENT => 'my G search'));
+
+        if($api->execute())
+        {
+          $yJson = $api->getData($ysearch);
+          $gJson = $api->getData($gsearch);
+
+          if(isset($yJson->ysearchresponse) && isset($gJson->responseData))
+          {
+            // normalization logic could be moved to each provider
+            foreach (array_merge($yJson->ysearchresponse->resultset_web, $gJson->responseData->results) as $data)
+            {
+              $result = new stdClass();
+              $result->title = $data->title;
+              $result->abstract = isset($data->abstract) ? $data->abstract : $data->content;
+              $result->url = $data->url;
+
+              array_push($this->results, $result);
+            }
+          }
+        }
       }
+
     }
-    else
-    {
-      $this->results = array();
-    }
-    $timer->addTime();
 
     return sfView::SUCCESS;
   }

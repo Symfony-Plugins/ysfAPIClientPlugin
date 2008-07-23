@@ -1,6 +1,11 @@
 <div class="yui-gc">
   <div class="yui-u first">
-  <h2><r3:trans>Welcome!</r3:trans></h2>
+  <h2 style="margin-bottom: 20px">Find something:</h2>
+
+  <form action="<?php echo url_for('ysfAPI/search'); ?>" method="post">
+    <?php echo $form; ?>
+    <input type="submit" value="go" />
+  </form>
 
   <?php if(isset($results) && !empty($results)): ?>
     <h2>Results for "<?php echo $query ?>":</h2>
