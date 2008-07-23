@@ -70,7 +70,7 @@ class ysfViewConfigHandler extends sfViewConfigHandler
       date('Y/m/d H:i:s'), implode('', $data));
 
       $moduleName = sfContext::getInstance()->getModuleName();
-      file_put_contents(sfConfigCache::getInstance()->getCacheName('modules_'.$moduleName.'_config_components'), $componentConfiguration);
+      file_put_contents(sfContext::getInstance()->getConfigCache()->getCacheName('modules_'.$moduleName.'_config_components'), $componentConfiguration);
     }
 
     return $retval;
