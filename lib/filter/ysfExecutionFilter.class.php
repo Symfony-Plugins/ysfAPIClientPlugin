@@ -21,7 +21,7 @@
  * @author     Dustin Whittle <dustin.whittle@symfony-project.com>
  * @version    SVN: $Id: sfExecutionFilter.class.php 4518 2007-07-03 05:47:15Z dwhittle $
  */
-class ysfExecutionFilter extends sfExecutionFilter
+class ysfAPIExecutionFilter extends sfExecutionFilter
 {
   /**
    * Executes the execute method of an action.
@@ -41,10 +41,10 @@ class ysfExecutionFilter extends sfExecutionFilter
       $moduleName = $actionInstance->getModuleName();
 
       // prefetch configuration to determine components
-      sfConfigCache::getInstance()->checkConfig(sfConfig::get('sf_app_module_dir_name').'/'.$moduleName.'/'.sfConfig::get('sf_app_module_config_dir_name').'/view.yml');
+      $this->getContext()->getConfigCache()->checkConfig(sfConfig::get('sf_app_module_dir_name').'/'.$moduleName.'/'.sfConfig::get('sf_app_module_config_dir_name').'/view.yml');
 
       // execute fetchDataFor method for each registered component
-      require(sfConfigCache::getInstance()->getCacheName('modules_'.$moduleName.'_config_components'));
+      require($this->getContext()->getConfigCache()->getCacheName('modules_'.$moduleName.'_config_components'));
     }
 
     // execute the action

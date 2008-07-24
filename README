@@ -28,7 +28,7 @@ The ysfAPIClientPlugin can provide functionality to allow aggregation of compone
 to use this functionality edit the execution filter in 'config/filters.yml':
 {{{
 execution:
-  class: ysfExecutionFilter
+  class: ysfAPIExecutionFilter
 }}}
 
 The ysfAPIClientPlugin is extremely configurable via the 'api.yml' configuration file:
