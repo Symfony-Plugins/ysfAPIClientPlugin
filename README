@@ -18,7 +18,7 @@ symfony plugin:install ysfAPIClientPlugin
 This plugin can be downloaded and installed into the plugins directory of your project.
 
 {{{
-svn export http://svn.symfony-project.org/plugins/ysfAPIClientPlugin/trunk ysfAPIClientPlugin
+svn export http://svn.symfony-project.com/plugins/ysfAPIClientPlugin/trunk ysfAPIClientPlugin
 }}}
 
 
