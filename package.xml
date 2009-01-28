@@ -13,11 +13,10 @@
   <email>dustin.whittle@symfony-project.com</email>
   <active>yes</active>
  </lead>
- <date>2008-04-22</date>
- <time>17:03:10</time>
+ <date>2009-01-28</date>
  <version>
-  <release>1.1.0.0</release>
-  <api>1.1.0.0</api>
+  <release>1.2.0</release>
+  <api>1.2.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -62,8 +61,7 @@
     <name>symfony</name>
     <channel>pear.symfony-project.com</channel>
     <min>1.1.0</min>
-    <max>1.2.0</max>
-    <exclude>1.2.0</exclude>
+    <max>1.4.0</max>
    </package>
   </required>
  </dependencies>
