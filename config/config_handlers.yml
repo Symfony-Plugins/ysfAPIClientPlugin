@@ -3,6 +3,6 @@ config/api.yml:
   param:
     prefix: ysf_
 
-modules/*/config/view.yml:
-  class:    ysfViewConfigHandler
+# modules/*/config/view.yml:
+#   class:    ysfViewConfigHandler
  

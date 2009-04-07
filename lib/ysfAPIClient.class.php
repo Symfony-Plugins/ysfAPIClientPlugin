@@ -261,6 +261,8 @@ class ysfAPIClient
             $this->responses[$id]['info'] = curl_getinfo($this->batches[$id]['handle']);
             $this->responses[$id]['data'] = curl_multi_getcontent($this->batches[$id]['handle']);
 
+            $this->context->getLogger()->debug('{ysfAPIClient} response '.$id.' completed in ' . $this->responses[$id]['info']['total_time'] . 'ms');
+
             $decodedResponse = $this->decodeResponse($this->responses[$id]['data'], $options['format']);
 
             if($this->checkResponse($decodedResponse))
@@ -280,13 +282,14 @@ class ysfAPIClient
         {
           foreach($this->batches as $id => $batch)
           {
-
             $response = $this->decodeResponse(curl_multi_getcontent($batch['handle']), $options['format']);
             if($this->checkResponse($response))
             {
               $this->responses[$id] = array();
               $this->responses[$id]['info'] = curl_getinfo($batch['handle']);
               $this->responses[$id]['data'] = $response;
+   
+              $this->context->getLogger()->debug('{ysfAPIClient} response '.$id.' completed in ' . $this->responses[$id]['info']['total_time'] . 'ms');
             }
             else
             {

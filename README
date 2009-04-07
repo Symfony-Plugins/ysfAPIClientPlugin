@@ -97,3 +97,9 @@ Here is a snippet of the api client from an action:
 
 
 Try it out in the bundled module: http://localhost/ysfAPI/index?query=symfony.
+
+
+Todo
+----
+
+  * Refactor to use ext/http, ext/oauth, ext/json
