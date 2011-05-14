@@ -278,25 +278,28 @@ class ysfAPIClient
             }
           }
         }
-        elseif(!isset($this->responses[$id]))
-        {
-          foreach($this->batches as $id => $batch)
+        else
+        {            
+          foreach($this->batches as $batchId => $batch)
           {
-            $response = $this->decodeResponse(curl_multi_getcontent($batch['handle']), $options['format']);
-            if($this->checkResponse($response))
+            if(!isset($this->responses[$batchId]) && $batch['handle'] == $this->requests[$server][$batchId])
             {
-              $this->responses[$id] = array();
-              $this->responses[$id]['info'] = curl_getinfo($batch['handle']);
-              $this->responses[$id]['data'] = $response;
-   
-              $this->context->getLogger()->debug('{ysfAPIClient} response '.$id.' completed in ' . $this->responses[$id]['info']['total_time'] . 'ms');
-            }
-            else
-            {
-              if($this->options['debug'])
-              {
-                $this->context->getLogger()->err(sprintf("{ysfAPIClient} checking response for batch id '%s' failed", $compoundBatchId));
-              }
+                $response = $this->decodeResponse(curl_multi_getcontent($batch['handle']), $options['format']);
+                if($this->checkResponse($response))
+                {
+                  $this->responses[$batchId] = array();
+                  $this->responses[$batchId]['info'] = curl_getinfo($batch['handle']);
+                  $this->responses[$batchId]['data'] = $response;
+
+                  $this->context->getLogger()->debug('{ysfAPIClient} response '.$this->responses[$batchId]['info']['url'].' completed in ' . $this->responses[$batchId]['info']['total_time'] . 'ms');
+                }
+                else
+                {
+                  if($this->options['debug'])
+                  {
+                    $this->context->getLogger()->err(sprintf("{ysfAPIClient} checking response for batch id '%s' failed", $compoundBatchId));
+                  }
+                }
             }
           }
         }
